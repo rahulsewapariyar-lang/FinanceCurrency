@@ -3,6 +3,7 @@ package com.basicApi.FinanceCurrency.controller;
 import com.basicApi.FinanceCurrency.dto.CurrencyPairResponse;
 import com.basicApi.FinanceCurrency.dto.ExchangeRateRequest;
 import com.basicApi.FinanceCurrency.dto.ExchangeRateResponse;
+import com.basicApi.FinanceCurrency.exception.CurrencyNotFoundException;
 import com.basicApi.FinanceCurrency.repository.ExchangeRateRepository;
 import com.basicApi.FinanceCurrency.service.ExchangeRateService;
 import org.springframework.http.ResponseEntity;
@@ -54,11 +55,11 @@ public class ExchangeRateController {
       }
       @DeleteMapping("/exchange-rate/delete/{id}")
       public ResponseEntity<ExchangeRateResponse> deleteFromDatabase(@PathVariable Long id){
-         exchangeRateRepository.deleteById(id);
-         return ResponseEntity.noContent().build();
+        exchangeRateService.deleteExchangeRate(id);
+        return ResponseEntity.noContent().build();
       }
       //Get Request for project B
-      // ✅ FIXED: Endpoint for Project B - check if currency pair exists
+      //Endpoint for Project B - check if currency pair exists
       @GetMapping("/from/{from}/to/{to}")
       public ResponseEntity<ExchangeRateResponse> getExchangeRates(
               @PathVariable String from,

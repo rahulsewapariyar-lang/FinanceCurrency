@@ -3,10 +3,7 @@ package com.basicApi.FinanceCurrency.service;
 import com.basicApi.FinanceCurrency.dto.CurrencyPairResponse;
 import com.basicApi.FinanceCurrency.dto.ExchangeRateRequest;
 import com.basicApi.FinanceCurrency.dto.ExchangeRateResponse;
-import com.basicApi.FinanceCurrency.exception.ExchangeRateNotFound;
-import com.basicApi.FinanceCurrency.exception.NoRatesFoundException;
-import com.basicApi.FinanceCurrency.exception.CurrencyNotFoundException;
-import com.basicApi.FinanceCurrency.exception.InvalidRequestException;
+import com.basicApi.FinanceCurrency.exception.*;
 import com.basicApi.FinanceCurrency.mapper.ExchangeRateMapper;
 import com.basicApi.FinanceCurrency.model.ExchangeRates;
 import com.basicApi.FinanceCurrency.repository.ExchangeRateRepository;
@@ -44,7 +41,7 @@ public class ExchangeRateService {
         }
         exchangeRateRepository.findByBaseCurrencyAndTargetCurrency(exchangeRateRequest.getBaseCurrency(),exchangeRateRequest.getTargetCurrency())
                         .ifPresent(existing->{
-                            throw new InvalidRequestException("Exchange rate already exists");
+                            throw new DuplicateExchangeRateException("Exchange rate already exists");
                         });
          ExchangeRates res =  ExchangeRateMapper.INSTANCE.mapDtoToExchangeRateEntity(exchangeRateRequest);
          res.setLocalDateTime(java.time.LocalDateTime.now());
@@ -85,8 +82,11 @@ public class ExchangeRateService {
         return ExchangeRateMapper.INSTANCE.mapExchangeRateEntityToDto(rate);
     }
     public void deleteExchangeRate(Long id){
-        exchangeRateRepository.findById(id)
-                .orElseThrow(()-> new CurrencyNotFoundException("Currency not found by id exception"));
+
+        if (!exchangeRateRepository.existsById(id)){
+            throw new CurrencyNotFoundException("Currency not found by id exception");
+        }
+        exchangeRateRepository.deleteById(id);
     }
    //check the exchangerate exists
     public ExchangeRateResponse getExchangeRates(String fromCurrency,String toCurrency) {
